@@ -2,6 +2,9 @@
 .env
 .env.*
 !.env.example
+# Non-secret, public production API base URL — safe to commit so the Vercel
+# build always bakes it in (a dashboard env var still overrides it).
+!frontend/.env.production
 
 # Python
 __pycache__/
