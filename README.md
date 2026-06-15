@@ -12,10 +12,10 @@ A production-ready, fully containerized full-stack application for managing **pr
 
 | Deliverable | URL |
 | --- | --- |
-| GitHub repository | `https://github.com/<you>/<repo>` |
-| Backend Docker Hub image | `https://hub.docker.com/r/<you>/ioms-backend` |
-| Live frontend (Vercel/Netlify) | `https://<your-frontend>.vercel.app` |
-| Live backend API (Render) | `https://<your-backend>.onrender.com` |
+| GitHub repository | https://github.com/Ayush-1-7/Containerized-Inventory-Order-Management-System |
+| Backend Docker Hub image | `https://hub.docker.com/r/<you>/ioms-backend` _(fill after `docker push`)_ |
+| Live frontend (Vercel/Netlify) | `https://<your-frontend>.vercel.app` _(fill after deploy)_ |
+| Live backend API (Render) | `https://<your-backend>.onrender.com` _(fill after deploy)_ |
 
 > Replace the placeholders above after deploying. See [DEPLOYMENT.md](./DEPLOYMENT.md).
 
