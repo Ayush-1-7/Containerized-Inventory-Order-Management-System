@@ -5,11 +5,13 @@ Production-Ready Containerized Inventory & Order Management System.
 | # | Deliverable | Link |
 | - | --- | --- |
 | 1 | **GitHub Repository (Frontend + Backend)** | https://github.com/Ayush-1-7/Containerized-Inventory-Order-Management-System |
-| 2 | **Backend Docker Hub Image Link** | `https://hub.docker.com/r/<dockerhub-username>/ioms-backend` |
+| 2 | **Backend Docker Hub Image Link** | https://hub.docker.com/r/ayush17v/ioms-backend |
 | 3 | **Frontend Hosted URL** | `https://<your-frontend>.vercel.app` |
 | 4 | **Backend API Hosted URL** | `https://<your-backend>.onrender.com` |
 
-> Items 2–4 require your own Docker Hub / Render / Vercel accounts. Follow
+> Pull the image: `docker pull ayush17v/ioms-backend:latest`
+>
+> Items 3–4 require your own Render / Vercel accounts. Follow
 > [DEPLOYMENT.md](./DEPLOYMENT.md) to produce them, then paste the URLs above.
 
 ## Quick reference for graders
