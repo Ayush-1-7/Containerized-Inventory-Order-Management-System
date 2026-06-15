@@ -57,7 +57,7 @@ Your **Docker Hub image link** is `https://hub.docker.com/r/<you>/ioms-backend`.
 ### Option A — Blueprint (recommended, provisions DB automatically)
 
 1. Render Dashboard → **New → Blueprint**.
-2. Connect your GitHub repo. Render reads [`backend/render.yaml`](./backend/render.yaml).
+2. Connect your GitHub repo. Render reads [`render.yaml`](./render.yaml) at the repo root.
 3. It creates **ioms-backend** (Docker web service) **and** **ioms-db** (free Postgres) and wires `DATABASE_URL` automatically.
 4. After the first deploy, set the env var `FRONTEND_ORIGIN` to your frontend URL (you'll get it in step 4) and redeploy. Use a comma-separated list if you have multiple.
 

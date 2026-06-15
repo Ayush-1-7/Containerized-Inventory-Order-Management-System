@@ -1,12 +1,12 @@
-# Render Blueprint — deploys the backend API + a free PostgreSQL instance.
-# In Render: New > Blueprint > point at this repo (root: backend/).
+# Render Blueprint (must live at the repo ROOT for auto-detection).
+# In Render: New > Blueprint > select this repo. It provisions the API + free Postgres.
 services:
   - type: web
     name: ioms-backend
     runtime: docker
     plan: free
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL
@@ -14,7 +14,7 @@ services:
           name: ioms-db
           property: connectionString
       - key: FRONTEND_ORIGIN
-        sync: false # set to your Vercel/Netlify URL after the frontend deploys
+        sync: false # set to your Vercel URL after the frontend deploys, then redeploy
       - key: LOW_STOCK_THRESHOLD
         value: "10"
       - key: SEED_ON_STARTUP
