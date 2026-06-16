@@ -7,6 +7,7 @@ import { Badge } from "../components/ui/Badge";
 import { DataTable } from "../components/ui/DataTable";
 import { SkeletonTable } from "../components/ui/Skeleton";
 import { EmptyState } from "../components/ui/EmptyState";
+import { ErrorState } from "../components/ui/ErrorState";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { OrderCreateModal } from "../components/orders/OrderCreateModal";
 import { OrderDetailModal } from "../components/orders/OrderDetailModal";
@@ -23,7 +24,7 @@ export default function Orders() {
   const { toast } = useToast();
   const del = useDeleteOrder();
 
-  const { data, isLoading } = useOrders({ page_size: 200 });
+  const { data, isPending, isError, refetch } = useOrders({ page_size: 200 });
   const orders = data?.items ?? [];
 
   useEffect(() => {
@@ -131,8 +132,10 @@ export default function Orders() {
         }
       />
 
-      {isLoading ? (
+      {isPending ? (
         <SkeletonTable rows={6} cols={6} />
+      ) : isError ? (
+        <ErrorState title="Couldn't load orders" onRetry={refetch} />
       ) : (
         <DataTable
           columns={columns}

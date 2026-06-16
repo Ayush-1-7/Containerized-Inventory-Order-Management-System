@@ -12,12 +12,25 @@ import { cn, formatCurrency } from "../../lib/utils";
 
 export function OrderCreateModal({ open, onClose }) {
   const { toast } = useToast();
-  const { data: customersData } = useCustomers({ page_size: 200 });
-  const { data: productsData } = useProducts({ page_size: 200 });
+  const {
+    data: customersData,
+    isPending: customersPending,
+    isError: customersError,
+    refetch: refetchCustomers,
+  } = useCustomers({ page_size: 200 });
+  const {
+    data: productsData,
+    isPending: productsPending,
+    isError: productsError,
+    refetch: refetchProducts,
+  } = useProducts({ page_size: 200 });
   const createOrder = useCreateOrder();
 
   const customers = customersData?.items ?? [];
   const products = productsData?.items ?? [];
+  const refsLoading = customersPending || productsPending;
+  const refsError = customersError || productsError;
+  const noCustomers = !customersPending && !customersError && customers.length === 0;
 
   const [customerId, setCustomerId] = useState("");
   const [lines, setLines] = useState([]); // [{ product_id, quantity }]
@@ -115,6 +128,31 @@ export function OrderCreateModal({ open, onClose }) {
       }
     >
       <div className="flex flex-col gap-5">
+        {refsError && (
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-danger/40 bg-danger/5 px-4 py-3">
+            <p className="flex items-center gap-2 text-sm text-danger">
+              <AlertTriangle className="h-4 w-4" />
+              Couldn't load customers or products.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (customersError) refetchCustomers();
+                if (productsError) refetchProducts();
+              }}
+            >
+              Retry
+            </Button>
+          </div>
+        )}
+
+        {noCustomers && !refsError && (
+          <div className="rounded-xl border border-dashed px-4 py-3 text-sm text-muted-foreground">
+            You don't have any customers yet — add a customer first to place an order.
+          </div>
+        )}
+
         <Field
           label="Customer"
           htmlFor="o-customer"
@@ -126,8 +164,11 @@ export function OrderCreateModal({ open, onClose }) {
             value={customerId}
             onChange={(e) => setCustomerId(e.target.value)}
             invalid={touched && !customerId}
+            disabled={refsLoading || refsError}
           >
-            <option value="">Select a customer…</option>
+            <option value="">
+              {customersPending ? "Loading customers…" : "Select a customer…"}
+            </option>
             {customers.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.full_name} — {c.email}
@@ -139,8 +180,14 @@ export function OrderCreateModal({ open, onClose }) {
         <div>
           <p className="mb-1.5 text-sm font-medium">Add products</p>
           <div className="flex gap-2">
-            <Select value={addId} onChange={(e) => setAddId(e.target.value)}>
-              <option value="">Choose a product…</option>
+            <Select
+              value={addId}
+              onChange={(e) => setAddId(e.target.value)}
+              disabled={refsLoading || refsError}
+            >
+              <option value="">
+                {productsPending ? "Loading products…" : "Choose a product…"}
+              </option>
               {availableToAdd.map((p) => (
                 <option key={p.id} value={p.id} disabled={p.quantity_in_stock === 0}>
                   {p.name} · {formatCurrency(p.price)} · {p.quantity_in_stock} in stock

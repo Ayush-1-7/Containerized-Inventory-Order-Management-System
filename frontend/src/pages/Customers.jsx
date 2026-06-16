@@ -7,6 +7,7 @@ import { DataTable } from "../components/ui/DataTable";
 import { SearchInput } from "../components/ui/SearchInput";
 import { SkeletonTable } from "../components/ui/Skeleton";
 import { EmptyState } from "../components/ui/EmptyState";
+import { ErrorState } from "../components/ui/ErrorState";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { CustomerFormModal } from "../components/customers/CustomerFormModal";
 import { useCustomers, useDeleteCustomer } from "../lib/queries";
@@ -22,7 +23,7 @@ export default function Customers() {
   const { toast } = useToast();
   const del = useDeleteCustomer();
 
-  const { data, isLoading } = useCustomers({ page_size: 200 });
+  const { data, isPending, isError, refetch } = useCustomers({ page_size: 200 });
   const customers = data?.items ?? [];
 
   useEffect(() => {
@@ -131,13 +132,17 @@ export default function Customers() {
           placeholder="Search by name or email…"
           className="sm:max-w-xs"
         />
-        <span className="ml-auto text-sm text-muted-foreground">
-          {filtered.length} of {customers.length}
-        </span>
+        {!isError && (
+          <span className="ml-auto text-sm text-muted-foreground">
+            {filtered.length} of {customers.length}
+          </span>
+        )}
       </div>
 
-      {isLoading ? (
+      {isPending ? (
         <SkeletonTable rows={6} cols={5} />
+      ) : isError ? (
+        <ErrorState title="Couldn't load customers" onRetry={refetch} />
       ) : (
         <DataTable
           columns={columns}

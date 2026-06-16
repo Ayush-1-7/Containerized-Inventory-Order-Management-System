@@ -18,8 +18,14 @@ import {
 import { PageHeader } from "../components/ui/PageHeader";
 import { Card } from "../components/ui/Card";
 import { Badge } from "../components/ui/Badge";
-import { SkeletonCards, SkeletonTable } from "../components/ui/Skeleton";
+import {
+  SkeletonCards,
+  SkeletonChart,
+  SkeletonList,
+  SkeletonTable,
+} from "../components/ui/Skeleton";
 import { EmptyState } from "../components/ui/EmptyState";
+import { ErrorState } from "../components/ui/ErrorState";
 import { useDashboard, useOrders } from "../lib/queries";
 import { cn, formatCurrency, formatDateTime, shortId } from "../lib/utils";
 
@@ -31,8 +37,13 @@ const KPIS = [
 ];
 
 export default function Dashboard() {
-  const { data: stats, isLoading } = useDashboard();
-  const { data: ordersData } = useOrders({ page_size: 6 });
+  const { data: stats, isPending, isError, refetch } = useDashboard();
+  const {
+    data: ordersData,
+    isPending: ordersPending,
+    isError: ordersError,
+    refetch: refetchOrders,
+  } = useOrders({ page_size: 6 });
   const orders = ordersData?.items ?? [];
 
   // Derive a simple 7-bucket orders-value trend from recent orders for the chart.
@@ -45,8 +56,14 @@ export default function Dashboard() {
         description="A real-time overview of your inventory and orders."
       />
 
-      {isLoading ? (
+      {isPending ? (
         <SkeletonCards />
+      ) : isError ? (
+        <ErrorState
+          title="Couldn't load dashboard"
+          description="We couldn't reach the server to load your stats."
+          onRetry={refetch}
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {KPIS.map((kpi) => {
@@ -88,35 +105,47 @@ export default function Dashboard() {
               <h3 className="text-base font-semibold">Order value trend</h3>
               <p className="text-sm text-muted-foreground">Recent order activity</p>
             </div>
-            <Badge variant="success">
-              <TrendingUp className="h-3 w-3" /> Live
-            </Badge>
+            {!ordersPending && !ordersError && (
+              <Badge variant="success">
+                <TrendingUp className="h-3 w-3" /> Live
+              </Badge>
+            )}
           </div>
-          <div className="h-64 w-full p-2 sm:p-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 16, right: 12, left: -12, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={11} stroke="hsl(var(--muted-foreground))" />
-                <YAxis tickLine={false} axisLine={false} fontSize={11} stroke="hsl(var(--muted-foreground))" width={48} />
-                <RTooltip
-                  cursor={{ stroke: "hsl(var(--border))" }}
-                  contentStyle={{
-                    background: "hsl(var(--elevated))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: 12,
-                    fontSize: 12,
-                  }}
-                  formatter={(v) => [formatCurrency(v), "Value"]}
-                />
-                <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#area)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          {ordersPending ? (
+            <SkeletonChart />
+          ) : ordersError ? (
+            <ErrorState
+              className="m-4 border-0"
+              title="Couldn't load trend"
+              onRetry={refetchOrders}
+            />
+          ) : (
+            <div className="h-64 w-full p-2 sm:p-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 16, right: 12, left: -12, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.35} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={11} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tickLine={false} axisLine={false} fontSize={11} stroke="hsl(var(--muted-foreground))" width={48} />
+                  <RTooltip
+                    cursor={{ stroke: "hsl(var(--border))" }}
+                    contentStyle={{
+                      background: "hsl(var(--elevated))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: 12,
+                      fontSize: 12,
+                    }}
+                    formatter={(v) => [formatCurrency(v), "Value"]}
+                  />
+                  <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#area)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </Card>
 
         {/* Low stock list */}
@@ -128,7 +157,16 @@ export default function Dashboard() {
             </Link>
           </div>
           <div className="flex-1 px-3 pb-3">
-            {(stats?.low_stock_products ?? []).length === 0 ? (
+            {isPending ? (
+              <SkeletonList rows={5} />
+            ) : isError ? (
+              <ErrorState
+                className="m-1 border-0 py-8"
+                title="Couldn't load stock"
+                description=""
+                onRetry={refetch}
+              />
+            ) : (stats?.low_stock_products ?? []).length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center py-8 text-center">
                 <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-success/12 text-success">
                   <Package className="h-5 w-5" />
@@ -162,10 +200,16 @@ export default function Dashboard() {
             View all
           </Link>
         </div>
-        {!ordersData ? (
+        {ordersPending ? (
           <div className="p-4">
             <SkeletonTable rows={4} cols={4} />
           </div>
+        ) : ordersError ? (
+          <ErrorState
+            className="m-4 border-0"
+            title="Couldn't load orders"
+            onRetry={refetchOrders}
+          />
         ) : orders.length === 0 ? (
           <EmptyState
             className="m-4 border-0"

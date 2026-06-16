@@ -1,11 +1,14 @@
+import { PackageX } from "lucide-react";
 import { Modal } from "../ui/Modal";
 import { Badge } from "../ui/Badge";
 import { useOrder } from "../../lib/queries";
 import { formatCurrency, formatDateTime, shortId } from "../../lib/utils";
-import { Skeleton } from "../ui/Skeleton";
+import { SkeletonDetail } from "../ui/Skeleton";
+import { ErrorState } from "../ui/ErrorState";
+import { EmptyState } from "../ui/EmptyState";
 
 export function OrderDetailModal({ orderId, open, onClose }) {
-  const { data: order, isLoading } = useOrder(orderId);
+  const { data: order, isPending, isError, refetch } = useOrder(orderId);
 
   return (
     <Modal
@@ -15,11 +18,22 @@ export function OrderDetailModal({ orderId, open, onClose }) {
       title={order ? `Order #${shortId(order.id)}` : "Order details"}
       description={order ? formatDateTime(order.created_at) : undefined}
     >
-      {isLoading || !order ? (
-        <div className="flex flex-col gap-3">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
+      {isPending ? (
+        <SkeletonDetail tiles={3} rows={3} />
+      ) : isError ? (
+        <ErrorState
+          className="border-0"
+          title="Couldn't load this order"
+          description="We couldn't reach the server. Please try again."
+          onRetry={refetch}
+        />
+      ) : !order ? (
+        <EmptyState
+          className="border-0"
+          icon={PackageX}
+          title="Order not found"
+          description="This order no longer exists or has been removed."
+        />
       ) : (
         <div className="flex flex-col gap-5">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

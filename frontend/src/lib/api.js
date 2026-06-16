@@ -1,11 +1,15 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+export const HEALTH_PATH = "/health";
 
 export const api = axios.create({
-  baseURL,
+  baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
-  timeout: 20000,
+  // Generous timeout: free-tier (Render) instances can take ~50-60s to wake
+  // from a cold start, so a short timeout would abort mid-wake and look broken.
+  timeout: 70000,
 });
 
 /** Extract a human-readable message from our uniform error envelope. */

@@ -8,6 +8,7 @@ import { DataTable } from "../components/ui/DataTable";
 import { SearchInput } from "../components/ui/SearchInput";
 import { SkeletonTable } from "../components/ui/Skeleton";
 import { EmptyState } from "../components/ui/EmptyState";
+import { ErrorState } from "../components/ui/ErrorState";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 import { ProductFormModal } from "../components/products/ProductFormModal";
 import { useDeleteProduct, useProducts } from "../lib/queries";
@@ -27,7 +28,7 @@ export default function Products() {
   const { toast } = useToast();
   const del = useDeleteProduct();
 
-  const { data, isLoading } = useProducts({ page_size: 200 });
+  const { data, isPending, isError, refetch } = useProducts({ page_size: 200 });
   const products = data?.items ?? [];
 
   useEffect(() => {
@@ -146,13 +147,17 @@ export default function Products() {
         >
           <Filter className="h-4 w-4" /> Low stock only
         </Button>
-        <span className="text-sm text-muted-foreground sm:ml-auto">
-          {filtered.length} of {products.length}
-        </span>
+        {!isError && (
+          <span className="text-sm text-muted-foreground sm:ml-auto">
+            {filtered.length} of {products.length}
+          </span>
+        )}
       </div>
 
-      {isLoading ? (
+      {isPending ? (
         <SkeletonTable rows={6} cols={4} />
+      ) : isError ? (
+        <ErrorState title="Couldn't load products" onRetry={refetch} />
       ) : (
         <DataTable
           columns={columns}
