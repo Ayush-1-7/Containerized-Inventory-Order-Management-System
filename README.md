@@ -14,8 +14,8 @@ A production-ready, fully containerized full-stack application for managing **pr
 | --- | --- |
 | GitHub repository | https://github.com/Ayush-1-7/Containerized-Inventory-Order-Management-System |
 | Backend Docker Hub image | https://hub.docker.com/r/ayush17v/ioms-backend |
-| Live frontend (Vercel/Netlify) | `https://<your-frontend>.vercel.app` _(fill after deploy)_ |
-| Live backend API (Render) | `https://<your-backend>.onrender.com` _(fill after deploy)_ |
+| Live frontend (Vercel/Netlify) | https://containerized-inventory-order-manag-psi.vercel.app/customers|
+| Live backend API  | https://ioms-backend-kjvj.onrender.com |
 
 > Replace the placeholders above after deploying. See [DEPLOYMENT.md](./DEPLOYMENT.md).
 
